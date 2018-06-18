@@ -59,8 +59,9 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int Fensterbreite, Fensterhoehe;
     private Knoten k1,k2;
 
-    public SPIEL()
+    public SPIEL()//hintergrundsetzen() geloescht
     {
+        
         //werte x, y, name, vollbild, exitOnEsc, fensterX, FensterY;
         super(1280, 720, "sidecroller beta", false, true, 0, 0);
         Fensterbreite = (int)fensterGroesse().breite; //nutzen um relativ zum fenster zu berechnen
@@ -70,8 +71,8 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         z = zustand.spiel;
 
         wallpaper = new Bild(0 ,-250, "files/visual/wallpaper/hintergrund.png");
-        hintergrundSetzen(wallpaper);
         wallpaper2 = new Bild(wallpaper.normaleBreite(), -250,"files/visual/wallpaper/hintergrund.png");
+        System.out.print(wallpaper.normaleBreite());
 
         //Tastatur
         this.tastenReagierbarAnmelden(this);
@@ -96,7 +97,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         //spieler erzeugen
         spieler = new SPIELER(100,20,50,20);
 
-        wurzel.add(spieler.spieler, heatbar.getRechteck(), startBoden.getRechteck());
+        wurzel.add(wallpaper,wallpaper2,spieler.spieler, heatbar.getRechteck(), startBoden.getRechteck());//geändert
 
         spielStarten();
 
@@ -157,7 +158,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         spieler.spieler.heavyComputingSetzen(true); 
         z = zustand.spiel;
         warten(5000);
-        wurzel.entfernen(startBoden.getRechteck());
+        //wurzel.entfernen(startBoden.getRechteck());
     }
 
     public void spielBeginnNeuStarten()
@@ -197,23 +198,24 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         wurzel.add(heatbar.cooldown(cool));
     }
 
-    public void hintergrund()
+    public void hintergrund() //geändert
     {
-        wallpaper.bewegen(-50,0);
-        wallpaper2.bewegen(-50,0);
-        if(wallpaper.getX() < -((wallpaper.normaleBreite()-1400)))
+        if(wallpaper.getX() <= -(wallpaper.normaleBreite()))
         {
-            hintergrundSetzen(wallpaper2);
             wallpaper.positionSetzen(wallpaper.normaleBreite(),-250);
         }
 
-        if(wallpaper2.getX() < -((wallpaper2.normaleBreite()-1400)))
+        else if(wallpaper2.getX() <= -(wallpaper2.normaleBreite()))
         {
-            hintergrundSetzen(wallpaper);
             wallpaper2.positionSetzen(wallpaper2.normaleBreite(),-250);
         }
-    }
+        else
+        {
+            wallpaper.bewegen(-147f,0);
+            wallpaper2.bewegen(-147f,0);
+        }
 
+    }
     public void bodenBewegen()
     {
         if(bodenZahl != 0)
