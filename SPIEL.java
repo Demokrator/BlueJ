@@ -23,6 +23,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
     private SPIELER spieler;
     private SHOP shop;
+    private DATENBANK datenbank;
     private BARRIERE barriere;
     private HEATBAR heatbar; //zum schießen
     private SOUND sound = new SOUND(); //sound sammlung laden
@@ -34,10 +35,10 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int hindernisseZahl = 0;
     private int projektilZahl = 0;
 
-    private int shotHeat = 20; //kaufbar
+    protected int shotHeat = 0; //kaufbar
     private int cooldown = 1;
-    private int projektilVel = 9; //kaufbar
-    private int projektilDamage = 50; //kaufbar
+    protected  int projektilVel = 0; //kaufbar
+    protected  int projektilDamage = 0; //kaufbar
 
     private int bodenYdiff = 150;
     private int bodenXdiff = 100;
@@ -50,8 +51,8 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int gegnerYdiff = 150;
     private int gegnerXdiff = 250;
     private int gegnerDeleteOffscreen = -100;  //wenn x-wert überschritten --> löschen
-    private int gegnerVel = 5; //kaufbar
-    private int gegnerHp = 100; //kaufbar
+    protected  int gegnerVel = 0; //kaufbar
+    protected  int gegnerHp = 0; //kaufbar
 
     private int tickrate = 20; //ticker speed
 
@@ -59,19 +60,22 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int Fensterbreite, Fensterhoehe;
     private Knoten k1,k2;
 
-    public SPIEL()//hintergrundsetzen() geloescht
+    public SPIEL()
     {
-        
         //werte x, y, name, vollbild, exitOnEsc, fensterX, FensterY;
         super(1280, 720, "sidecroller beta", false, true, 0, 0);
         Fensterbreite = (int)fensterGroesse().breite; //nutzen um relativ zum fenster zu berechnen
         Fensterhoehe = (int)fensterGroesse().hoehe; //somit kann man Fenstergröße schnell ändern
 
+        datenbank = new DATENBANK(this);
+        datenbank.datenbankInitialisieren();
+        datenbankAuslesen();
+
         zufall = new Random();
         z = zustand.spiel;
 
-        wallpaper = new Bild(0 ,-250, "files/visual/wallpaper/hintergrund.png");
-        wallpaper2 = new Bild(wallpaper.normaleBreite(), -250,"files/visual/wallpaper/hintergrund.png");
+        wallpaper = new Bild(0 ,-250, "files/visual/wallpaper/hintergrund.jpg");
+        wallpaper2 = new Bild(wallpaper.normaleBreite(), -250,"files/visual/wallpaper/hintergrund.jpg");
         System.out.print(wallpaper.normaleBreite());
 
         //Tastatur
@@ -149,6 +153,22 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         }
     }
 
+    public void datenbankAuslesen()
+    {
+        int[] daten = datenbank.DatenbankLesen();
+
+        shotHeat = daten[0];
+        projektilVel = daten[1];
+        projektilDamage = daten[2];
+        gegnerVel = daten[3];
+        gegnerHp = daten[4];
+    }
+
+    public void datenbankSpeichern()
+    {
+        datenbank.DatenbankSchreiben();
+    }
+
     public void spielStarten()
     {
         z = zustand.pause;
@@ -158,7 +178,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         spieler.spieler.heavyComputingSetzen(true); 
         z = zustand.spiel;
         warten(5000);
-        //wurzel.entfernen(startBoden.getRechteck());
+        wurzel.entfernen(startBoden.getRechteck());
     }
 
     public void spielBeginnNeuStarten()
@@ -210,12 +230,12 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
             wallpaper2.positionSetzen(wallpaper2.normaleBreite(),-250);
         }
         else
-        {
-            wallpaper.bewegen(-147f,0);
-            wallpaper2.bewegen(-147f,0);
+        {            
+            wallpaper.bewegen(-1f,0);
+            wallpaper2.bewegen(-1f,0);
         }
-
     }
+
     public void bodenBewegen()
     {
         if(bodenZahl != 0)
