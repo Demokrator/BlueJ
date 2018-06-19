@@ -76,7 +76,6 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
         wallpaper = new Bild(0 ,-250, "files/visual/wallpaper/hintergrund.jpg");
         wallpaper2 = new Bild(wallpaper.normaleBreite(), -250,"files/visual/wallpaper/hintergrund.jpg");
-        System.out.print(wallpaper.normaleBreite());
 
         //Tastatur
         this.tastenReagierbarAnmelden(this);
