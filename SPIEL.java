@@ -1,7 +1,6 @@
 import ea.*;
 import java.util.*;
 
-//Test
 /**
  * Beschreiben Sie hier die Klasse SPIEL.
  * 
@@ -20,6 +19,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private ArrayList <GEGNER> gegner = new ArrayList<GEGNER>();
     private Bild wallpaper;
     private Bild wallpaper2;
+    private Text scoreAnzeige;
 
     private SPIELER spieler;
     private SHOP shop;
@@ -34,6 +34,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int gegnerZahl = 0;
     private int hindernisseZahl = 0;
     private int projektilZahl = 0;
+    private int score = 0;
 
     protected int shotHeat = 0; //kaufbar
     private int cooldown = 1;
@@ -53,12 +54,15 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     private int gegnerDeleteOffscreen = -100;  //wenn x-wert überschritten --> löschen
     protected  int gegnerVel = 0; //kaufbar
     protected  int gegnerHp = 0; //kaufbar
+    private int gegnerScore = 10;
 
     private int tickrate = 20; //ticker speed
 
     private Random zufall;
     private int Fensterbreite, Fensterhoehe;
     private Knoten k1,k2;
+    
+    private String epilepsie, normal; //hintergrund 
 
     public SPIEL()
     {
@@ -73,9 +77,11 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
         zufall = new Random();
         z = zustand.spiel;
-
-        wallpaper = new Bild(0 ,-250, "files/visual/wallpaper/hintergrund.jpg");
-        wallpaper2 = new Bild(wallpaper.normaleBreite(), -250,"files/visual/wallpaper/hintergrund.jpg");
+        
+        epilepsie = ("files" + pfadtrenner + "visual" + pfadtrenner + "wallpaper" + pfadtrenner + "eyefuck.jpg"); //pfad für jeweiliges bild
+        normal = ("files" + pfadtrenner + "visual" + pfadtrenner + "wallpaper" + pfadtrenner + "hintergrund.jpg"); //als string speichern        
+        wallpaper = new Bild(0 ,-250, normal);
+        wallpaper2 = new Bild(wallpaper.normaleBreite(), -250, normal);
 
         //Tastatur
         this.tastenReagierbarAnmelden(this);
@@ -96,11 +102,13 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
         startBoden = new BODEN(100,100,50,10);
         startBoden.getRechteck().passivMachen();
+        
+        scoreAnzeige = new Text(Fensterbreite - 200, 40, 30, "Score: " + score);
 
         //spieler erzeugen
         spieler = new SPIELER(100,20,50,20);
 
-        wurzel.add(wallpaper,wallpaper2,spieler.spieler, heatbar.getRechteck(), startBoden.getRechteck());//geändert
+        wurzel.add(wallpaper,wallpaper2,spieler.spieler, heatbar.getRechteck(), startBoden.getRechteck(), scoreAnzeige);
 
         spielStarten();
 
@@ -148,8 +156,19 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         }
         catch(Exception e)
         {
-
+            
         }
+    }
+    
+    public void updateScore(int points)
+    {
+        //scoreAnzeige.loeschen();
+        //wurzel.entfernen(scoreAnzeige);
+        score = score + points;
+        scoreAnzeige.inhaltSetzen("Score: " + score);
+        
+        //scoreAnzeige = new Text(Fensterbreite - 200, 40, 30, "Score: " + score);
+        //wurzel.add(scoreAnzeige);
     }
 
     public void datenbankAuslesen()
@@ -387,7 +406,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         {
             if((gegner.get(gegnerZahl-1).getX() + gegner.get(gegnerZahl-1).getBreite()) < Fensterbreite)
             {
-                gegner.add(gegnerZahl, new GEGNER(Fensterbreite + distanceToLast, createNoise(diff, (int)gegner.get(gegnerZahl-1).getY(), Fensterhoehe/2), 30, 10, gegnerVel, gegnerHp));
+                gegner.add(gegnerZahl, new GEGNER(Fensterbreite + distanceToLast, createNoise(diff, (int)gegner.get(gegnerZahl-1).getY(), Fensterhoehe/2), 30, 10, gegnerVel, gegnerHp, gegnerScore));
                 //kollisionsReagierbarAnmelden(this, spieler.spieler, gegner.get(gegnerZahl).getRechteck(), 1); //berührung mit spieler ID 1
                 gegner.get(gegnerZahl).getRechteck().heavyComputingSetzen(true);
                 wurzel.add(gegner.get(gegnerZahl).getRechteck());
@@ -397,7 +416,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         }
         else    //falls keine gegner da neuen machen
         {
-            gegner.add(0, new GEGNER(Fensterbreite + distanceToLast, Fensterhoehe/2, 30, 10, gegnerVel, gegnerHp));
+            gegner.add(0, new GEGNER(Fensterbreite + distanceToLast, Fensterhoehe/2, 30, 10, gegnerVel, gegnerHp, gegnerScore));
             //kollisionsReagierbarAnmelden(this, spieler.spieler, gegner.get(0).getRechteck(), 1); //berührung mit spieler ID 1
             gegner.get(0).getRechteck().heavyComputingSetzen(true);
             wurzel.add(gegner.get(0).getRechteck());

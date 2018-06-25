@@ -14,8 +14,9 @@ public class GEGNER
     private int hp = 100;
     private int vel;
     private boolean alive = true;
+    private int points;
 
-    public GEGNER(int Nx,int Ny,int Nb, int Nl, int vel, int hp)
+    public GEGNER(int Nx,int Ny,int Nb, int Nl, int vel, int hp, int points)
     {
         x=Nx;
         y=Ny;
@@ -23,6 +24,7 @@ public class GEGNER
         laenge=Nl;
         this.vel = vel;
         this.hp = hp;
+        this.points = points;
         
         
         zufall = new Random();
@@ -47,14 +49,17 @@ public class GEGNER
     {
         //Index = projektilZahl
         
-        for (int i = 0; i < index; i++)
+        if(alive == true) //nur wenn am leben --> man bekommt keinen score mehr wenn toter gegner getroffen wird
         {
-            if(gegner.schneidet(projektile.get(i).getRechteck()) == true || projektile.get(i).getRechteck().stehtAuf(gegner))
+            for (int i = 0; i < index; i++)
             {
-                hit(projektile.get(i).getDamage(), spiel); //schaden machen
-                gegner.farbeSetzen("rot");
-            }
-        }            
+                if(gegner.schneidet(projektile.get(i).getRechteck()) == true || projektile.get(i).getRechteck().stehtAuf(gegner))
+                {
+                    hit(projektile.get(i).getDamage(), spiel); //schaden machen
+                    gegner.farbeSetzen("rot");
+                }
+            }   
+        }
     }
     
     public void hit(int damage, SPIEL spiel)
@@ -64,6 +69,8 @@ public class GEGNER
             alive = false; //unschädlich machen
             gegner.sichtbarSetzen(false);  //optisch verschwinden lassen --> werden immer noch gelöscht wenn bildschirm verlassen
             spiel.wurzel.entfernen(gegner); //aus wurzel entfernen damit man nicht auf unsichtbarem gegner stehen kann
+            
+            spiel.updateScore(points);
         }
         else
         {
