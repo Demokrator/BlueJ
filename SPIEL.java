@@ -86,9 +86,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         //Tastatur
         this.tastenReagierbarAnmelden(this);
 
-        //Ticker
-        //Alle 20 Millisekunden ein Tick
-        manager.anmelden(this, tickrate); 
+         
 
         k1 = new Knoten();//Bild
         k2 = new Knoten();//rendern
@@ -101,58 +99,60 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         heatbar = new HEATBAR(Fensterbreite - 150, 20, 0, 10); //heatbar ohne hitze
 
         startBoden = new Rechteck(100,100,50,10);
-        
 
         scoreAnzeige = new Text(Fensterbreite - 200, 40, 30, "Score: " + score);
-
         //spieler erzeugen
         spieler = new SPIELER(100,20,50,20);
 
-        wurzel.add(wallpaper,wallpaper2,spieler.spieler, heatbar.getRechteck(), startBoden, scoreAnzeige);
+        wurzel.add(wallpaper,wallpaper2,spieler.getRechteck(), heatbar.getRechteck(), startBoden, scoreAnzeige);
         startBoden.passivMachen();
-        spielStarten();
 
         this.rechenintensiveArbeitSetzen(true);
+        //Ticker
+        //Alle 20 Millisekunden ein Tick
+        manager.anmelden(this, tickrate);
+        
+        spielStarten();
     }
 
     public void tick() 
     {
-        
-            //alles bewegen
-            bodenBewegen(); 
-            hindernisseBewegen();
-            projektileBewegen();
-            gegnerBewegen();
-            //wallpaper.bewegen(-1,0);
-            hintergrund();
 
-            //neues adden falls nötig
-            addNewBoden(bodenXdiff, bodenYdiff);
-            addNewHindernisse(hindernissXdiff, hindernissYdiff);
-            addNewGegner(gegnerXdiff, gegnerYdiff);
+        //alles bewegen
+        bodenBewegen(); 
+        hindernisseBewegen();
+        projektileBewegen();
+        gegnerBewegen();
+        //wallpaper.bewegen(-1,0);
+        hintergrund();
 
-            //unnötiges löschen
-            deleteOffScreenBoden();
-            deleteOffScreenHindernisse();
-            deleteOffScreenProjektile();
-            deleteOffScreenGegner();
+        //neues adden falls nötig
+        addNewBoden(bodenXdiff, bodenYdiff);
+        addNewHindernisse(hindernissXdiff, hindernissYdiff);
+        addNewGegner(gegnerXdiff, gegnerYdiff);
 
-            //schuss kühlen
-            cooldownShot(cooldown);
+        //unnötiges löschen
+        deleteOffScreenBoden();
+        deleteOffScreenHindernisse();
+        deleteOffScreenProjektile();
+        deleteOffScreenGegner();
 
-            spielerGegnerHit();
-            projektilGegnerHit();
+        //schuss kühlen
+        cooldownShot(cooldown);
 
-            if(tasteGedrueckt(0)==true && z == zustand.spiel)
-            {
-                spieler.bewegen(-5, 0);
-            }
+        spielerGegnerHit();
+        projektilGegnerHit();
 
-            if(tasteGedrueckt(3)==true && z == zustand.spiel)
-            {
-                spieler.bewegen(5, 0);
-            }
-        
+        if(tasteGedrueckt(0)==true && z == zustand.spiel)
+        {
+            spieler.bewegen(-5, 0);
+        }
+
+        if(tasteGedrueckt(3)==true && z == zustand.spiel)
+        {
+            spieler.bewegen(5, 0);
+        }
+
     }
 
     public void updateScore(int points)
@@ -186,9 +186,9 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     {
         z = zustand.pause;
         warten(2000);
-        spieler.spieler.aktivMachen();
-        spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
-        spieler.spieler.heavyComputingSetzen(true); 
+        spieler.getRechteck().aktivMachen();
+        spieler.getRechteck().fallReagierbarAnmelden(this, Fensterhoehe);
+        spieler.getRechteck().heavyComputingSetzen(true); 
         z = zustand.spiel;
         warten(5000);
         wurzel.entfernen(startBoden);
@@ -197,10 +197,10 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
     public void spielBeginnNeuStarten()
     {
         z = zustand.pause;
-        spieler.spieler.passivMachen(); 
+        spieler.getRechteck().passivMachen(); 
         warten(500);
-        spieler.spieler.aktivMachen();
-        spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
+        spieler.getRechteck().aktivMachen();
+        spieler.getRechteck().fallReagierbarAnmelden(this, Fensterhoehe);
         z = zustand.spiel;
         warten(500);
         wurzel.entfernen(startBoden);
@@ -219,7 +219,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         z = zustand.spiel;
         shop.beenden();
         manager.starten(this,tickrate);
-       
+
     }
 
     public void cooldownShot(int cool)
@@ -371,7 +371,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
         //distanceToLast = x-abstand zu letzter platte
         //diff = y-abstand zu letzter platte
 
-        if(hindernisseZahl != 0)
+        if(hindernisseZahl > 0)
         {
             if((hindernisse[hindernisseZahl-1].getX() + hindernisse[hindernisseZahl - 1].getBreite()) < Fensterbreite)
             {
@@ -463,16 +463,22 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
     public void spielerGegnerHit()
     {
-        if(gegnerZahl != 0)
-        {
-            for(GEGNER gegner: gegner)
+
+            if(gegnerZahl > 0)
             {
-                if(gegner.spielerSchneiden(spieler) == true)
+                for(GEGNER g: gegner)
                 {
-                    fallReagieren();
+                    if(g.spielerSchneiden(spieler) == true)
+                    {
+                        fallReagieren();
+                    }
                 }
             }
-        }
+            else
+            {
+                System.out.println("kein Gegner vorhanden");
+            }
+
     }
 
     public void projektilGegnerHit()
@@ -498,7 +504,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
     public void spielReset()
     {
-        
+
         //boden aus wurzel entfernen
         for(int i = 0; i < bodenZahl; i++)
         {
@@ -545,29 +551,30 @@ implements FallReagierbar, KollisionsReagierbar, Ticker
 
     public void fallReagieren()
     {
-        spieler.spieler.passivMachen();
-        spieler.spieler.positionSetzen(100,20);
-        manager.anhalten(this);                
+        spieler.getRechteck().passivMachen();
+        spieler.getRechteck().positionSetzen(100,20);
+        manager.anhalten(this);  
+        manager.abmelden(this);
         spielReset();
         spielStarten();
-        manager.starten(this, tickrate);    
+        manager.anmelden(this, tickrate);    
     }
 
-   /* public void tickerIntervallSetzen(int ms) 
+    /* public void tickerIntervallSetzen(int ms) 
     {
-        this.tickerAbmelden(this);
-        this.tickerAnmelden(this, ms);
+    this.tickerAbmelden(this);
+    this.tickerAnmelden(this, ms);
     }
 
     public void tickerStoppen() 
     {
-        this.tickerAbmelden(this);
+    this.tickerAbmelden(this);
     }
 
     public void tickerNeuStarten(int ms) 
     {
-        this.tickerAbmelden(this);
-        this.tickerAnmelden(this, ms);
+    this.tickerAbmelden(this);
+    this.tickerAnmelden(this, ms);
     }*/
 
     public void tasteReagieren(int code)

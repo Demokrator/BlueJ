@@ -3,7 +3,7 @@ public class SPIELER
 {
     //private Figur spieler;
     
-    protected Rechteck spieler;//nur temporär //protected zum Zugreifen
+    private Rechteck spieler;//nur temporär //protected zum Zugreifen
     
     
     public SPIELER(int Nx,int Ny,int Nb, int Nl)
