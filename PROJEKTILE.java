@@ -2,7 +2,8 @@ import ea.*;
 
 public class PROJEKTILE 
 {
-    private Rechteck projektile; // nur temporär
+    //private Rechteck projektile;
+    protected Figur projektile;
     protected int ID = 2;
     private int x;
     private int y;
@@ -19,8 +20,9 @@ public class PROJEKTILE
         laenge = Nl;
         xvel = vel;
         this.damage = damage;
-
-        projektile = new Rechteck(x,Ny,Nb,Nl);
+        projektile = new Figur(Nx, Ny, "files/visual/figuren/Projektil.eaf");
+        projektile.faktorSetzen(1);
+        //projektile = new Rechteck(x,Ny,Nb,Nl);
     }
     
     public void bewegen()
@@ -58,7 +60,7 @@ public class PROJEKTILE
         return (int)projektile.getHoehe();
     }
     
-    public Rechteck getRechteck()
+    public Figur getRechteck()
     {
       return projektile;   
     }

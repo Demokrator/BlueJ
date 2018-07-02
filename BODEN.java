@@ -2,7 +2,8 @@ import ea.*;
 
 public class BODEN 
 {
-    private Rechteck boden;
+    //private Rechteck boden;
+    protected Figur boden;
     protected int ID= 4;
     private int x;
     private int y;
@@ -15,7 +16,9 @@ public class BODEN
         y = Ny;
         breite = Nb;
         laenge = Nl;
-        boden = new Rechteck(Nx,Ny,Nb,Nl);
+        //boden = new Rechteck(Nx,Ny,Nb,Nl);
+        boden = new Figur(Nx, Ny, "files/visual/figuren/Boden.eaf");
+        boden.faktorSetzen(3);
     }
     
     public void bewegen(int x, int y)
@@ -48,7 +51,7 @@ public class BODEN
         return (int)boden.getHoehe();
     }
     
-    public Rechteck getRechteck()
+    public Figur getRechteck()
     {
         return boden;   
     }

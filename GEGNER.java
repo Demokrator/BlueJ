@@ -3,9 +3,12 @@ import java.util.*;
 
 public class GEGNER
 {
-    private Rechteck gegner;
+    protected Figur gegner;
+    //private Rechteck gegner;
     protected int ID = 3;
     private Random zufall;
+    private Figur explosion;
+    private String[] pfade = {"files/visual/figuren/Gegner1Rot.eaf", "files/visual/figuren/Gegner2Gruen.eaf", "files/visual/figuren/Gegner3Mischmasch.eaf"};
 
     private int x;
     private int y;
@@ -18,23 +21,26 @@ public class GEGNER
 
     public GEGNER(int Nx,int Ny,int Nb, int Nl, int vel, int hp, int points)
     {
-        x=Nx;
-        y=Ny;
-        breite=Nb;
-        laenge=Nl;
+        x = Nx;
+        y = Ny;
+        breite = Nb;
+        laenge = Nl;
         this.vel = vel;
         this.hp = hp;
         this.points = points;
 
         zufall = new Random();
-        gegner=new Rechteck(Nx,Ny,Nb,Nl);  
+        int tmpSprite = zufall.nextInt(pfade.length);
+        
+        //gegner=new Rechteck(Nx,Ny,Nb,Nl);  
+        gegner = new Figur(Nx, Ny, pfade[tmpSprite]);
     }
 
     public boolean spielerSchneiden(SPIELER spieler)
     {
         if(alive == true) //kollision nur wenn gegner noch am leben ist
         {
-            if(gegner.schneidet(spieler.getRechteck()) == true || spieler.getRechteck().stehtAuf(gegner))
+            if(gegner.schneidet(spieler.spieler) == true || spieler.spieler.stehtAuf(gegner))
             {
                 return true;
             }
@@ -54,20 +60,47 @@ public class GEGNER
                 if(gegner.schneidet(projektile.get(i).getRechteck()) == true || projektile.get(i).getRechteck().stehtAuf(gegner))
                 {
                     hit(projektile.get(i).getDamage(), spiel); //schaden machen
-                    gegner.farbeSetzen("rot");
+                    projektile.get(i).getRechteck().loeschen();
+                    spiel.wurzel.entfernen(projektile.get(i).getRechteck());
+                    projektile.remove(i);
+                    spiel.projektilZahl--;
+                    index--;//geändert
                 }
             }   
+        }
+    }
+    
+    public void animationStoppen(SPIEL spiel)
+    {
+        if(alive == false)
+        {
+            if(explosion.aktuellesBild() == explosion.animation().length - 1) //wenn letztes bild der animation erreicht --> aktuelles bild gleich letztes der animation
+            {
+                explosion.loeschen();
+                spiel.wurzel.entfernen(explosion);
+                
+                spiel.gegnerZahl--;
+                spiel.gegner.remove(this);
+                
+            }
         }
     }
 
     public void hit(int damage, SPIEL spiel)
     {
-        if(hp - damage < 0)
+        if(hp - damage <= 0)
         {
             alive = false; //unschädlich machen
-            gegner.sichtbarSetzen(false);  //optisch verschwinden lassen --> werden immer noch gelöscht wenn bildschirm verlassen
+            gegner.sichtbarSetzen(false); //optisch verschwinden lassen --> werden immer noch gelöscht wenn bildschirm verlassen
+            gegner.loeschen();
             spiel.wurzel.entfernen(gegner); //aus wurzel entfernen damit man nicht auf unsichtbarem gegner stehen kann
 
+            
+
+            explosion = new Figur(gegner.getX(), gegner.getY(), "files/visual/figuren/Explosion.eaf");
+            explosion.animationsGeschwindigkeitSetzen(2);
+            spiel.wurzel.add(explosion);
+            
             spiel.updateScore(points);
         }
         else
@@ -125,7 +158,7 @@ public class GEGNER
         return (int)gegner.getHoehe();
     }
 
-    public Rechteck getRechteck()
+    public Figur getRechteck()
     {
         return gegner;   
     }

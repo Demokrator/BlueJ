@@ -9,6 +9,18 @@ public class SHOP extends Game implements MausReagierbar
     private SPIEL spiel;
     private ArrayList <Rechteck> button = new ArrayList <Rechteck>();
 
+    private int preisShotHeat;
+    private int preisProjektilVel;
+    private int preisProjektilDamage;
+    private int preisGegnerVel;
+    private int preisGegnerHp;
+
+    private int minShotHeat;
+    private int maxProjektilVel;
+    private int maxProjektilDamage;
+    private int minGegnerVel;
+    private int minGegnerHp;
+
     public SHOP(SPIEL spiel)
     {
         super(800, 550, "Shop", false, true);
@@ -26,6 +38,18 @@ public class SHOP extends Game implements MausReagierbar
         buttonbreite = fensterbreite - (2 * abstandx);
         buttonhoehe = 50;
         maxAnzahlButton = 5;
+
+        preisShotHeat = 150;
+        preisProjektilVel = 100;
+        preisProjektilDamage = 100;
+        preisGegnerVel = 200;
+        preisGegnerHp = 150;
+
+        minShotHeat = 5;
+        maxProjektilVel = 17;
+        maxProjektilDamage = 100;
+        minGegnerVel = 2;
+        minGegnerHp = 70;
 
         for (int i = 0; i < maxAnzahlButton; i++)
         {
@@ -54,34 +78,75 @@ public class SHOP extends Game implements MausReagierbar
 
     public void mausReagieren(int code)
     {
+        String farbe = "Rot";
         switch(code)
         {
             case 0:
-            spiel.shotHeat = spiel.shotHeat - 5;
+            if(spiel.score > preisShotHeat && spiel.shotHeat > minShotHeat)
+            {
+                spiel.shotHeat = spiel.shotHeat - 5;
+                spiel.updateScore(-preisShotHeat);
+            }
+            else
+            {
+                farbe = "Blau";
+            }
             break;
 
             case 1:
-            spiel.projektilVel = spiel.projektilVel + 2;
+            if(spiel.score > preisProjektilVel && spiel.projektilVel < maxProjektilVel)
+            {
+                spiel.projektilVel = spiel.projektilVel + 2;
+                spiel.updateScore(-preisProjektilVel);
+            }
+            else
+            {
+                farbe = "Blau";
+            }            
             break;
 
             case 2:
-            spiel.projektilDamage = spiel.projektilDamage + 10;
+            if(spiel.score > preisProjektilDamage && spiel.projektilDamage < maxProjektilDamage)
+            {
+                spiel.projektilDamage = spiel.projektilDamage + 10;
+                spiel.updateScore(-preisProjektilDamage);
+            }
+            else
+            {
+                farbe = "Blau";
+            }            
             break;
 
             case 3:
-            spiel.gegnerVel = spiel.gegnerVel - 1;
+            if(spiel.score > preisGegnerVel && spiel.gegnerVel > minGegnerVel)
+            {
+                spiel.gegnerVel = spiel.gegnerVel - 1;
+                spiel.updateScore(-preisGegnerVel);
+            }
+            else
+            {
+                farbe = "Blau";
+            }            
             break;
 
             case 4:
-            spiel.gegnerHp = spiel.gegnerHp - 5;
+            if(spiel.score > preisGegnerHp && spiel.gegnerHp > minGegnerHp)
+            {
+                spiel.gegnerHp = spiel.gegnerHp - 5;
+                spiel.updateScore(-preisGegnerHp);
+            }
+            else
+            {
+                farbe = "Blau";
+            }            
             break;
         }
 
         spiel.datenbankSpeichern();
-        
+
         Rechteck buttontmp = button.get(code);
-        buttontmp.farbeSetzen("Rot");
+        buttontmp.farbeSetzen(farbe);
         warten(50);
         buttontmp.farbeSetzen("Weiss");
-    }
+    }    
 }

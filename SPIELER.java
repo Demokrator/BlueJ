@@ -1,15 +1,17 @@
 import ea.*;
 public class SPIELER
 {
-    //private Figur spieler;
+    protected Figur spieler;
     
-    private Rechteck spieler;//nur temporär //protected zum Zugreifen
+    //protected Rechteck spieler;//nur temporär //protected zum Zugreifen
     
     
     public SPIELER(int Nx,int Ny,int Nb, int Nl)
     {
-       spieler = new Rechteck(Nx,Ny,Nb,Nl); 
-       spieler.farbeSetzen("grün");
+       spieler = new Figur(Nx, Ny, "files/visual/figuren/Figur.eaf");
+       //spieler.faktorSetzen(2);
+       //spieler = new Rechteck(Nx,Ny,Nb,Nl); 
+       //spieler.farbeSetzen("grün");
     }
     
      public void bewegen(int x, int y)
@@ -27,7 +29,7 @@ public class SPIELER
         return this;
     }
     
-    public Rechteck getRechteck()
+    public Figur getRechteck()
     {
         return spieler;   
     } 

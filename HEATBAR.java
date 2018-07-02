@@ -9,12 +9,12 @@ public class HEATBAR
     private int heat;
     private int maxHeat = 100;
     private int laenge;
+    private int currentHeat = 0;
 
     public HEATBAR(int Nx,int Ny,int Nb, int Nl)
     {
         x = Nx;
         y = Ny;
-        heat =Nb;
         laenge = Nl;
         heatbar = new Rechteck(Nx,Ny,Nb,Nl);
         heatbar.farbeSetzen("rot");
@@ -29,7 +29,7 @@ public class HEATBAR
     
     public Rechteck heat(int heat)
     {
-        heatbar.breiteSetzen((int)heatbar.getBreite() + heat); //leiste größer machen
+        heatbar.breiteSetzen((int)heatbar.getBreite() + heat); //heat adden
         
         return heatbar; //zum leichter in die wurzel fügen
     }
