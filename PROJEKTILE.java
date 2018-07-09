@@ -12,12 +12,10 @@ public class PROJEKTILE
     private int xvel;
     private int damage;
     
-    public PROJEKTILE(int Nx,int Ny,int Nb, int Nl, int vel, int damage)
+    public PROJEKTILE(int Nx,int Ny, int vel, int damage)
     {
         x = Nx;
         y = Ny;
-        breite = Nb;
-        laenge = Nl;
         xvel = vel;
         this.damage = damage;
         projektile = new Figur(Nx, Ny, "files/visual/figuren/Projektil.eaf");

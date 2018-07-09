@@ -7,7 +7,7 @@ public class GEGNER
     //private Rechteck gegner;
     protected int ID = 3;
     private Random zufall;
-    private Figur explosion;
+    protected Figur explosion;
     private String[] pfade = {"files/visual/figuren/Gegner1Rot.eaf", "files/visual/figuren/Gegner2Gruen.eaf", "files/visual/figuren/Gegner3Mischmasch.eaf"};
 
     private int x;
@@ -40,7 +40,7 @@ public class GEGNER
     {
         if(alive == true) //kollision nur wenn gegner noch am leben ist
         {
-            if(gegner.schneidet(spieler.spieler) == true || spieler.spieler.stehtAuf(gegner))
+            if(gegner.schneidet(spieler.spieler) == true || spieler.spieler.stehtAuf(gegner) == true)
             {
                 return true;
             }
@@ -49,41 +49,42 @@ public class GEGNER
         return false;
     }
 
-    public void projektilSchneiden(ArrayList<PROJEKTILE> projektile, int index, SPIEL spiel)
+    public void projektilSchneiden(ArrayList<PROJEKTILE> projektile, int index, SPIEL spiel) //changed
     {
         //Index = projektilZahl
 
         if(alive == true) //nur wenn am leben --> man bekommt keinen score mehr wenn toter gegner getroffen wird
         {
-            for (int i = 0; i < index; i++)
+            for (int i = 0; i < index - 1; i++) //changed
             {
                 if(gegner.schneidet(projektile.get(i).getRechteck()) == true || projektile.get(i).getRechteck().stehtAuf(gegner))
                 {
                     hit(projektile.get(i).getDamage(), spiel); //schaden machen
                     projektile.get(i).getRechteck().loeschen();
-                    spiel.wurzel.entfernen(projektile.get(i).getRechteck());
-                    projektile.remove(i);
+                    spiel.pro.entfernen(projektile.get(i).getRechteck());
                     spiel.projektilZahl--;
-                    index--;//geändert
+                    projektile.remove(i);
                 }
             }   
         }
     }
     
-    public void animationStoppen(SPIEL spiel)
+    public GEGNER animationStoppen()//changed
     {
         if(alive == false)
         {
-            if(explosion.aktuellesBild() == explosion.animation().length - 1) //wenn letztes bild der animation erreicht --> aktuelles bild gleich letztes der animation
+            if(explosion.aktuellesBild() >= explosion.animation().length - 2) //wenn letztes bild der animation erreicht --> aktuelles bild gleich letztes der animation
             {
                 explosion.loeschen();
-                spiel.wurzel.entfernen(explosion);
+                //spiel.wurzel.entfernen(explosion);
                 
-                spiel.gegnerZahl--;
-                spiel.gegner.remove(this);
-                
+                //spiel.gegnerZahl--;
+                //spiel.gegner.remove(this);
+                return this;
             }
         }
+        
+        return null;
     }
 
     public void hit(int damage, SPIEL spiel)
@@ -93,7 +94,7 @@ public class GEGNER
             alive = false; //unschädlich machen
             gegner.sichtbarSetzen(false); //optisch verschwinden lassen --> werden immer noch gelöscht wenn bildschirm verlassen
             gegner.loeschen();
-            spiel.wurzel.entfernen(gegner); //aus wurzel entfernen damit man nicht auf unsichtbarem gegner stehen kann
+            spiel.geg.entfernen(gegner); //aus wurzel entfernen damit man nicht auf unsichtbarem gegner stehen kann
 
             
 
