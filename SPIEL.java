@@ -98,9 +98,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         hindernisse = new HINDERNISSE[100];
 
         //start objekte erzeugen
-        //heatbar = new HEATBAR(Fensterbreite - 150, 20, 0, 10); //heatbar ohne hitze
-        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heatbar ohne hitze
-
+       
         startBoden = new BODEN(100,100,50,10);
         startBoden.getRechteck().passivMachen();
 
@@ -114,6 +112,9 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         spieler = new SPIELER(100,20,50,20);
 
         wurzel.add(wallpaper,wallpaper2,spieler.spieler, startBoden.getRechteck(), scoreAnzeige, pro, geg);
+        
+        //heatbar = new HEATBAR(Fensterbreite - 150, 20, 0, 10); //heatbar ohne hitze
+        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heatbar ohne hitze
 
         //ticker ist in spiel starten
 
@@ -192,7 +193,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         warten(2000);
         spieler.spieler.aktivMachen();
         spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
-        //spieler.spieler.heavyComputingSetzen(true); 
+        spieler.spieler.heavyComputingSetzen(true); 
         z = zustand.spiel;
         warten(5000);
         startBoden.getRechteck().loeschen();
@@ -202,17 +203,17 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     public void spielBeginnNeuStarten()
     {
         z = zustand.pause;
-        
-        warten(30);
         startBoden = new BODEN(100,100,0,0);
         startBoden.getRechteck().passivMachen();
         wurzel.add(startBoden.getRechteck());
         warten(2000);
         
         z = zustand.spiel;
-        spieler.spieler.aktivMachen();
+        spieler.spieler.schwerkraftAktivSetzen(true);
         spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
+           
         warten(5000);
+        
         startBoden.getRechteck().loeschen();
         wurzel.entfernen(startBoden.getRechteck());
     }
@@ -564,17 +565,17 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         //neu erzeugen     
         //wurzel.entfernen(heatbar.getRechteck());
         heatbarnew.wurzelEntfernen();
-        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heat leiste leeren
-
+        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heat leiste leeren 
         //wurzel.add(heatbar.getRechteck());
     }
 
     public void fallReagieren()
     {
-        spieler.spieler.passivMachen();
-        manager.anhalten(this);
         spieler.spieler.positionSetzen(100,20);
-                        
+        spieler.spieler.schwerkraftAktivSetzen(false);
+
+        manager.anhalten(this);
+             
         spielReset();
         manager.starten(this, tickrate);
         spielBeginnNeuStarten();
@@ -655,14 +656,14 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
             }
             // Tastenbelegung im shop
         }
-        else 
-        {
 
-        } 
     }
 
     public void klickReagieren(Punkt p)
     {
+        if(z == zustand.spiel)
+       {
         shoot(shotHeat);
+       }
     }
 }
