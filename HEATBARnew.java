@@ -19,8 +19,8 @@ public class HEATBARnew
         //schieber = new Rechteck(bar.getX() + 1, Ny, maxHeat, bar.getHoehe());
         schieber = new Rechteck(bar.getX() + bar.getBreite() + 1, Ny, 0, bar.getHoehe());
         //cooldown((int)bar.getBreite());
-        spiel.wurzel.add(bar);
-        spiel.wurzel.add(schieber);        
+        spiel.wurzel.add(schieber);
+        spiel.wurzel.add(bar);        
     }
 
     public void cooldown(int cool)

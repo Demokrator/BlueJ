@@ -4,16 +4,22 @@ import java.util.*;
 public class SHOP extends Game implements MausReagierbar 
 {
     private int buttonbreite, buttonhoehe, abstandy, abstandx, fensterbreite, fensterhoehe, maxAnzahlButton;
-    private Rechteck button1, button2, button3;
+    //private Rechteck button1, button2, button3;
     private Maus maus;
     private SPIEL spiel;
-    private ArrayList <Rechteck> button = new ArrayList <Rechteck>();
-
+    private ArrayList <Figur> button = new ArrayList <Figur>();
+    
+    private String[] pfade = {"files/visual/shop/ShotHeatGrafik.eaf", "files/visual/shop/ShotSpeedGrafik.eaf", "files/visual/shop/ShotDamageGrafik.eaf", "files/visual/shop/GegnerSpeedGrafik.eaf", "files/visual/shop/GegnerHPGrafik.eaf"};
+    
+    private Bild hintergrund = new Bild(-250,-250,"files/visual/wallpaper/shop.png");
+    
     private int preisShotHeat;
     private int preisProjektilVel;
     private int preisProjektilDamage;
     private int preisGegnerVel;
     private int preisGegnerHp;
+    
+    private int shotHeatLV = 0;
 
     private int minShotHeat;
     private int maxProjektilVel;
@@ -23,18 +29,20 @@ public class SHOP extends Game implements MausReagierbar
 
     public SHOP(SPIEL spiel)
     {
-        super(800, 550, "Shop", false, true);
+        super(800, 650, "Shop", false, true);
 
         fensterbreite = (int)fensterGroesse().breite;
         fensterhoehe = (int)fensterGroesse().hoehe;
+        
+        hintergrundSetzen(hintergrund);
 
         maus = new Maus(3);
         mausAnmelden(maus);
 
         this.spiel = spiel;
 
-        abstandy = 50;
-        abstandx = 50;
+        abstandy = 60;
+        abstandx = 150;
         buttonbreite = fensterbreite - (2 * abstandx);
         buttonhoehe = 50;
         maxAnzahlButton = 5;
@@ -53,15 +61,18 @@ public class SHOP extends Game implements MausReagierbar
 
         for (int i = 0; i < maxAnzahlButton; i++)
         {
-            button.add(new Rechteck(abstandx, (((i + 1) * abstandy) + (i * buttonhoehe)), buttonbreite, buttonhoehe));
+            button.add(new Figur(abstandx, (((i + 1) * abstandy) + (i * buttonhoehe)), pfade[i]));
         }
 
         int i = 0;
-        for(Rechteck buttontmp: button)
+        for(Figur buttontmp: button)
         {
-            buttontmp.farbeSetzen("Weiss");
+            //buttontmp.farbeSetzen("Weiss");
             wurzel.add(buttontmp);
             buttontmp.passivMachen();
+            buttontmp.faktorSetzen(5);
+            buttontmp.animiertSetzen(false);
+            buttontmp.animationsBildSetzen(0);
             maus.anmelden(this, buttontmp, button.indexOf(buttontmp));
         }
     }
@@ -78,6 +89,7 @@ public class SHOP extends Game implements MausReagierbar
 
     public void mausReagieren(int code)
     {
+        Figur buttontmp = button.get(code);
         String farbe = "Rot";
         switch(code)
         {
@@ -86,6 +98,8 @@ public class SHOP extends Game implements MausReagierbar
             {
                 spiel.shotHeat = spiel.shotHeat - 5;
                 spiel.updateScore(-preisShotHeat);
+                shotHeatLV++;
+                buttontmp.animationsBildSetzen(shotHeatLV);
             }
             else
             {
@@ -98,6 +112,7 @@ public class SHOP extends Game implements MausReagierbar
             {
                 spiel.projektilVel = spiel.projektilVel + 2;
                 spiel.updateScore(-preisProjektilVel);
+                buttontmp.animationsSchritt(1);
             }
             else
             {
@@ -110,6 +125,7 @@ public class SHOP extends Game implements MausReagierbar
             {
                 spiel.projektilDamage = spiel.projektilDamage + 10;
                 spiel.updateScore(-preisProjektilDamage);
+                buttontmp.animationsSchritt(1);
             }
             else
             {
@@ -122,6 +138,7 @@ public class SHOP extends Game implements MausReagierbar
             {
                 spiel.gegnerVel = spiel.gegnerVel - 1;
                 spiel.updateScore(-preisGegnerVel);
+                buttontmp.animationsSchritt(1);
             }
             else
             {
@@ -134,6 +151,7 @@ public class SHOP extends Game implements MausReagierbar
             {
                 spiel.gegnerHp = spiel.gegnerHp - 5;
                 spiel.updateScore(-preisGegnerHp);
+                buttontmp.animationsSchritt(1);
             }
             else
             {
@@ -144,9 +162,14 @@ public class SHOP extends Game implements MausReagierbar
 
         spiel.datenbankSpeichern();
 
-        Rechteck buttontmp = button.get(code);
-        buttontmp.farbeSetzen(farbe);
-        warten(50);
-        buttontmp.farbeSetzen("Weiss");
+        
+        if(farbe == "Blau")        
+        {
+            buttontmp.farbenTransformieren(178,34,34);
+            warten(100);
+            buttontmp.farbenTransformieren(-178,-34,-34);
+        }
+        //warten(50);
+        //buttontmp.farbeSetzen("Weiss");
     }    
 }

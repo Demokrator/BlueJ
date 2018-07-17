@@ -44,8 +44,8 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     protected  int projektilDamage = 0; //kaufbar
 
     private int bodenYdiff = 150;
-    private int bodenXdiff = 100;
-    private int bodenDeleteOffscreen = -400; //wenn x-wert überschritten --> löschen
+    private int bodenXdiff = 200;
+    private int bodenDeleteOffscreen = -100; //wenn x-wert überschritten --> löschen
 
     private int hindernissYdiff = 100;
     private int hindernissXdiff = 500;
@@ -58,11 +58,12 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     protected  int gegnerHp = 0; //kaufbar
     private int gegnerScore = 10;
 
-    private int tickrate = 25; //ticker speed
+    private int tickrate = 20; //ticker speed
+    private int clock = 0;
 
     private Random zufall;
     private int Fensterbreite, Fensterhoehe;
-    protected Knoten pro,geg;
+    protected Knoten pro,geg,spl;
 
     private String achtBit, normal; //hintergrund 
 
@@ -92,13 +93,17 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
 
         pro = new Knoten();//Projektile
         geg = new Knoten();//Gegner
+        spl = new Knoten();//Spieler + Boden
 
         //felder erstellen
-        boden = new BODEN[100];
-        hindernisse = new HINDERNISSE[100];
+        boden = new BODEN[20];
+        hindernisse = new HINDERNISSE[10];
 
         //start objekte erzeugen
-       
+        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heatbar ohne hitze
+        heatbarnew.wurzelEntfernen();
+        
+
         startBoden = new BODEN(100,100,50,10);
         startBoden.getRechteck().passivMachen();
 
@@ -111,13 +116,11 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         //spieler erzeugen
         spieler = new SPIELER(100,20,50,20);
 
-        wurzel.add(wallpaper,wallpaper2,spieler.spieler, startBoden.getRechteck(), scoreAnzeige, pro, geg);
-        
-        //heatbar = new HEATBAR(Fensterbreite - 150, 20, 0, 10); //heatbar ohne hitze
-        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heatbar ohne hitze
+        wurzel.add(wallpaper,wallpaper2, spl, scoreAnzeige, pro, geg);
+        spl.add(spieler.spieler,startBoden.getRechteck());
 
         //ticker ist in spiel starten
-
+        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this);
         spielStarten();
     }
 
@@ -142,6 +145,10 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         deleteOffScreenProjektile();
         deleteOffScreenGegner();
 
+        //clock
+        clockUpdate();
+        startBodenLoeschen();
+
         //schuss kühlen
         cooldownShot(cooldown);
 
@@ -160,7 +167,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         }
 
     }
-    
+
     public void updateScore(int points)
     {
         score = score + points;
@@ -187,47 +194,76 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     {
         //Ticker
         //Alle 20 Millisekunden ein Tick
-        this.tickerAnmelden(this, tickrate);
 
         z = zustand.pause;
-        warten(2000);
+        //warten(2000);
         spieler.spieler.aktivMachen();
         spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
-        spieler.spieler.heavyComputingSetzen(true); 
+        //spieler.spieler.heavyComputingSetzen(true); 
         z = zustand.spiel;
-        warten(5000);
-        startBoden.getRechteck().loeschen();
-        wurzel.entfernen(startBoden.getRechteck());
+        //warten(5000);
+        //startBoden.getRechteck().loeschen();
+        //spl.entfernen(startBoden.getRechteck());
+
+        this.tickerAnmelden(this, tickrate);
     }
 
-    public void spielBeginnNeuStarten()
+    public void spielBeginnNeuStarten() //Veraendert 
     {
+
         z = zustand.pause;
-        startBoden = new BODEN(100,100,0,0);
-        startBoden.getRechteck().passivMachen();
-        wurzel.add(startBoden.getRechteck());
-        warten(2000);
-        
+        //spieler.spieler.passivMachen(); //auskommentiert
+        //warten(30);
+        if(startBoden == null)
+        {
+            startBoden = new BODEN(100,100,0,0);
+            startBoden.getRechteck().passivMachen();
+            wurzel.add(startBoden.getRechteck());
+        }
+
+        //warten(500);
+
         z = zustand.spiel;
-        spieler.spieler.schwerkraftAktivSetzen(true);
+        spieler.spieler.aktivMachen();
         spieler.spieler.fallReagierbarAnmelden(this, Fensterhoehe);
-           
-        warten(5000);
-        
-        startBoden.getRechteck().loeschen();
-        wurzel.entfernen(startBoden.getRechteck());
+
+        clock = 0;
+
+        //warten(5000);
+        //startBoden.getRechteck().loeschen(); //geadded
+        //wurzel.entfernen(startBoden.getRechteck());
+    }
+
+    public void clockUpdate()
+    {
+        if(clock < 10000)
+        {   
+            clock = clock + tickrate;
+        }
+    }
+
+    public void startBodenLoeschen()
+    {
+        if(clock >= 5500 && startBoden != null)
+        {
+            startBoden.getRechteck().loeschen(); 
+            startBoden.getRechteck().sichtbarSetzen(false);
+            startBoden.getRechteck().neutralMachen();
+            wurzel.entfernen(startBoden.getRechteck());
+            startBoden = null;
+        }
     }
 
     public void shopAufrufen()
     {
-        z = zustand.shop;
+        //z = zustand.shop;
         tickerStoppen();
         shop = new SHOP(this);
     }
 
     public void shopAbmelden()
     {
-        z = zustand.spiel;
+        //z = zustand.spiel;
         shop.beenden();
         this.tickerAnmelden(this, tickrate);
         spielBeginnNeuStarten();
@@ -291,8 +327,9 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
 
     public void deleteOffScreenBoden()
     {
-        if(boden[0].getX() < bodenDeleteOffscreen)
+        if(bodenZahl >0 && boden[0].getX() < bodenDeleteOffscreen)
         {
+            boden[0].getRechteck().loeschen();
             wurzel.entfernen(boden[0].getRechteck());          
 
             //nachrücken
@@ -310,6 +347,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     {
         if(hindernisse[0].getX() < hindernissDeleteOffscreen)
         {
+            hindernisse[0].getRechteck().loeschen();
             wurzel.entfernen(hindernisse[0].getRechteck());  
 
             //nachrücken
@@ -329,6 +367,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         {
             if(projektile.get(0).getX() > Fensterbreite + 200)
             {
+                projektile.get(0).getRechteck().loeschen();
                 pro.entfernen(projektile.get(0).getRechteck()); 
                 projektile.remove(0);
 
@@ -343,6 +382,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         {
             if(gegner.get(0).getX() <  gegnerDeleteOffscreen)
             {
+                gegner.get(0).getRechteck().loeschen();
                 geg.entfernen(gegner.get(0).getRechteck()); 
                 gegner.remove(0);
 
@@ -355,23 +395,29 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     {                     
         //distanceToLast = x-abstand zu letzter platte
         //diff = y-abstand zu letzter platte
-
-        if(bodenZahl != 0)
+        try
         {
-            if((boden[bodenZahl-1].getX() + boden[bodenZahl - 1].getBreite()) < Fensterbreite)
+            if(bodenZahl != 0)
             {
-                boden[bodenZahl] = new BODEN(Fensterbreite + distanceToLast, createNoise(diff, (int)boden[bodenZahl-1].getY(), Fensterhoehe/2), 50, 10);
-                wurzel.add(boden[bodenZahl].getRechteck());
-                boden[bodenZahl].getRechteck().passivMachen();
-                bodenZahl++;               
+                if((boden[bodenZahl-1].getX() + boden[bodenZahl - 1].getBreite()) < Fensterbreite)
+                {
+                    boden[bodenZahl] = new BODEN(Fensterbreite + distanceToLast, createNoise(diff, (int)boden[bodenZahl-1].getY(), Fensterhoehe/2), 50, 10);
+                    spl.add(boden[bodenZahl].getRechteck());
+                    boden[bodenZahl].getRechteck().passivMachen();
+                    bodenZahl++;               
+                }
+            }
+            else //falls noch keine da 
+            {
+                boden[0] = new BODEN(Fensterbreite, Fensterhoehe/2 + 50, 50, 10);
+                boden[0].getRechteck().passivMachen();
+                spl.add(boden[0].getRechteck());
+                bodenZahl++;
             }
         }
-        else //falls noch keine da 
+        catch(Exception e)
         {
-            boden[0] = new BODEN(Fensterbreite, Fensterhoehe/2 + 50, 50, 10);
-            boden[0].getRechteck().passivMachen();
-            wurzel.add(boden[0].getRechteck());
-            bodenZahl++;
+            System.out.println(e);
         }
     }
 
@@ -384,8 +430,8 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         {
             if((hindernisse[hindernisseZahl-1].getX() + hindernisse[hindernisseZahl - 1].getBreite()) < Fensterbreite)
             {
-                hindernisse[hindernisseZahl] = new HINDERNISSE(Fensterbreite + distanceToLast, createNoise(diff, (int)hindernisse[hindernisseZahl-1].getY(), Fensterhoehe/2), 20, 20);
-                wurzel.add(hindernisse[hindernisseZahl].getRechteck());
+                hindernisse[hindernisseZahl] = new HINDERNISSE(Fensterbreite + distanceToLast, createNoise(diff, (int)hindernisse[hindernisseZahl-1].getY(), Fensterhoehe/3), 20, 20);
+                spl.add(hindernisse[hindernisseZahl].getRechteck());
                 hindernisse[hindernisseZahl].getRechteck().passivMachen();
                 hindernisseZahl++;               
             }
@@ -394,7 +440,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         {
             hindernisse[0] = new HINDERNISSE(Fensterbreite, 120,20,20);
             hindernisse[0].getRechteck().passivMachen();
-            wurzel.add(hindernisse[0].getRechteck());
+            spl.add(hindernisse[0].getRechteck());
             hindernisseZahl++;
         }
     }
@@ -408,7 +454,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         {
             if((gegner.get(gegnerZahl-1).getX() + gegner.get(gegnerZahl-1).getBreite()) < Fensterbreite)
             {
-                gegner.add(gegnerZahl, new GEGNER(Fensterbreite + distanceToLast, createNoise(diff, (int)gegner.get(gegnerZahl-1).getY(), Fensterhoehe/2), 30, 10, gegnerVel, gegnerHp, gegnerScore));
+                gegner.add(gegnerZahl, new GEGNER(Fensterbreite + distanceToLast, createNoise(diff, (int)gegner.get(gegnerZahl-1).getY(), Fensterhoehe/2-50), 30, 10, gegnerVel, gegnerHp, gegnerScore));
                 //kollisionsReagierbarAnmelden(this, spieler.spieler, gegner.get(gegnerZahl).getRechteck(), 1); //berührung mit spieler ID 1
                 gegner.get(gegnerZahl).getRechteck().heavyComputingSetzen(true);
                 geg.add(gegner.get(gegnerZahl).getRechteck());
@@ -445,7 +491,8 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
 
     public void shoot(int heat)
     {
-        
+        try
+        {
             if(heatbarnew.heat(heat) == true) //lässt nur schießen wenn nach schuss hitze unter 100 wäre
             {
                 //wurzel.entfernen(heatbar.getRechteck());
@@ -458,7 +505,11 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
                 pro.add(projektile.get(projektilZahl).getRechteck());
                 projektilZahl++;
             }
- 
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        } 
     }
 
     public void projektileBewegen()
@@ -488,7 +539,7 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
     }
 
     public void projektilGegnerHit()
-    {
+    {   
         if(gegnerZahl != 0)
         {
             for(int i = 0; i < gegnerZahl; i++)
@@ -532,27 +583,31 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         //boden aus wurzel entfernen
         for(int i = 0; i < bodenZahl; i++)
         {
-            wurzel.entfernen(boden[i].getRechteck());
+            boden[i].getRechteck().loeschen();
+            spl.entfernen(boden[i].getRechteck());
         }
         //hindernisse aus wurzel entfernen
         for(int i = 0; i < hindernisseZahl; i++)
         {
-            wurzel.entfernen(hindernisse[i].getRechteck());
+            hindernisse[i].getRechteck().loeschen();
+            spl.entfernen(hindernisse[i].getRechteck());
         }
         //projektile aus wurzel entfernen
         for(int i = 0; i < projektilZahl; i++)
         {
+            projektile.get(i).getRechteck().loeschen();
             pro.entfernen(projektile.get(i).getRechteck());
         }  
         //gegner aus wurzel entfernen
         for(int i = 0; i < gegnerZahl; i++)
         {
+            gegner.get(i).getRechteck().loeschen();
             geg.entfernen(gegner.get(i).getRechteck());
         }
 
         //felder leeren
-        boden = new BODEN[100];
-        hindernisse = new HINDERNISSE[100];
+        boden = new BODEN[20];
+        hindernisse = new HINDERNISSE[10];
         projektile.clear();
         gegner.clear();
 
@@ -565,22 +620,18 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
         //neu erzeugen     
         //wurzel.entfernen(heatbar.getRechteck());
         heatbarnew.wurzelEntfernen();
-        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heat leiste leeren 
+        heatbarnew = new HEATBARnew(Fensterbreite - 215, 20, this); //heat leiste leeren
+
         //wurzel.add(heatbar.getRechteck());
     }
 
     public void fallReagieren()
     {
         spieler.spieler.positionSetzen(100,20);
-        spieler.spieler.schwerkraftAktivSetzen(false);
-
-        manager.anhalten(this);
-             
+        manager.anhalten(this);                
         spielReset();
-        manager.starten(this, tickrate);
+        manager.starten(this, tickrate);  
         spielBeginnNeuStarten();
-        //warten(1000);
-            
     }
 
     public void tickerIntervallSetzen(int ms) 
@@ -617,11 +668,9 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
                 break;
 
                 case 22: //oben "w"
-                manager.anhalten(this); 
                 break;
 
                 case 18: //unten "s"
-                manager.starten(this, tickrate); 
                 break;
 
                 case 30: //springen "leer"                   
@@ -646,7 +695,11 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
                 break;
 
                 case 25: //taste "z"
-                shopAufrufen();
+                if(clock > 5000)
+                {
+                    shopAufrufen();
+            }
+                //startBoden.getRechteck().passivMachen();
                 break;
 
                 case 17: //taste "r"
@@ -656,14 +709,14 @@ implements FallReagierbar, KollisionsReagierbar, Ticker, KlickReagierbar
             }
             // Tastenbelegung im shop
         }
+        else 
+        {
 
+        } 
     }
 
     public void klickReagieren(Punkt p)
     {
-        if(z == zustand.spiel)
-       {
         shoot(shotHeat);
-       }
     }
 }

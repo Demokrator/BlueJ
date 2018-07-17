@@ -1,7 +1,7 @@
 import ea.*;
 public class SPIELER
 {
-    public Figur spieler;
+    protected Figur spieler;
     
     //protected Rechteck spieler;//nur temporär //protected zum Zugreifen
     

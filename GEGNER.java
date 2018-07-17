@@ -32,6 +32,7 @@ public class GEGNER
         zufall = new Random();
         int tmpSprite = zufall.nextInt(pfade.length);
         
+        
         //gegner=new Rechteck(Nx,Ny,Nb,Nl);  
         gegner = new Figur(Nx, Ny, pfade[tmpSprite]);
     }
@@ -75,6 +76,7 @@ public class GEGNER
         {
             if(explosion.aktuellesBild() >= explosion.animation().length - 2) //wenn letztes bild der animation erreicht --> aktuelles bild gleich letztes der animation
             {
+                explosion.animiertSetzen(false);
                 explosion.loeschen();
                 //spiel.wurzel.entfernen(explosion);
                 
